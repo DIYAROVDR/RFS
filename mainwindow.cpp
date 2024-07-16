@@ -3,6 +3,19 @@
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+
+    ui->plot->addGraph();
+    ui->plot->graph(0)->setPen(QPen(Qt::blue));
+
+    ui->plot->addGraph();
+    ui->plot->graph(1)->setPen(QPen(Qt::red));
+
+    ui->plot->xAxis->setLabel("x,m");
+    ui->plot->yAxis->setLabel("P,atm");
+
+    ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone); // Убираем линии
+    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 4)); // Устанавливаем кружки
+
 }
 
 MainWindow::~MainWindow() {
@@ -76,6 +89,14 @@ void MainWindow::on_btn_run_clicked() {
     ui->time_slider->setMaximum(nt);
     ui->spin_box_current_time_step->setMaximum(nt);
 
+    ui->plot->xAxis->setRange(0, L);
+    ui->plot->yAxis->setRange(Pw/1E+5, Pe/1E+5);
+    x = g1.getX();
+    coords.clear();
+    for(int i=0;i < nx+1;++i) {
+
+        coords.append(x[i]);
+    }
 }
 
 
@@ -95,9 +116,33 @@ void MainWindow::on_time_slider_valueChanged(int value) {
     ui->spin_box_current_time_step->setValue(value);
     ui->data->setRowCount(0);
     ui->data->setRowCount(nx+1);
+    QVector<double> Pn,Pa,x;
+    double Pa_i,Pn_i;
     for(int i = 0;i<nx;++i){
-        ui->data->item(i,0)->setText(QString::number(P_num[value][i]));
-        ui->data->item(i,1)->setText(QString::number(P_an[value][i]));
+        Pn_i = P_num[value][i]/1E+5;
+        Pa_i = P_an[value][i]/1E+5;
+
+        Pn.append(Pn_i);
+        Pa.append(Pa_i);
+
+
+        QTableWidgetItem * unum = new QTableWidgetItem();
+        QTableWidgetItem * uan = new QTableWidgetItem();
+        QTableWidgetItem * abs = new QTableWidgetItem();
+
+        unum->setText(QString::number(Pn_i));
+        uan->setText(QString::number(Pa_i));
+        abs->setText(QString::number(Pa_i-Pn_i));
+
+        ui->data->setItem(i,0,unum);
+        ui->data->setItem(i,1,uan);
+        ui->data->setItem(i,2,abs);
+
     }
+
+    ui->plot->graph(0)->setData(coords, Pn);
+    ui->plot->graph(1)->setData(coords, Pa);
+
+    ui->plot->replot();
 }
 

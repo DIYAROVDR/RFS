@@ -41,16 +41,9 @@ void NumSolver::run() {
         std::copy(grid.getQ(), grid.getQ() + nx, Q);
 
         for(int i = 1; i < nx - 1; ++i) {
-            P[n+1][i] = P[n][i] + (dt/D[i])*(T[i]*(P[n][i+1]-P[n][i])+T[i-1]*(P[n][i-1]-P[n][i])-Q[i-1]);
+            P[n+1][i] = P[n][i] + (dt/D[i])*(T[i]*(P[n][i+1]-P[n][i])+T[i-1]*(P[n][i-1]-P[n][i])-Q[i]);
         }
-        /*
-        std::cout <<"Time step n = " << n << std::endl;
-        for(int i = 0; i < nx; ++i){
-            std::cout << "P[" << i + 1 << "] = " << P[n][i]/1E+5 << ";" << " ";
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
-        */
+
         grid.setPressure(P[n+1]);
         grid.update();
 

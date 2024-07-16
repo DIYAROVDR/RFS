@@ -30,6 +30,7 @@ private:
     double** P_num;
     double** P_an;
     double* x;
+    QVector<double> coords;
 
 };
 
