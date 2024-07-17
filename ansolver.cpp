@@ -42,31 +42,11 @@ double AnSolver::StephestAlgorithm(double td,double xd) {
 }
 
 void AnSolver::run() {
-
-    for(int n = 0;n < N + 1;++n){
-
+    for(int n = 0;n < N + 1;++n) {
         for(int i = 0; i < nx; ++i) {
-            if (n == 0){
-                P[n][i] = Pe;
-            }
-            if (i == 0) {
-                P[n][i] = Pw;
-            }
-            P[n][i] = Pw + dimp*StephestAlgorithm(t[n]*dimt,x[i+1]*dimx);
+            P[n][i] = Pw + dimp*StephestAlgorithm(t[n]*dimt,x[i]*dimx);
         }
-        P[n][nx] = Pe;
     }
-
-    /*
-    for(int n = 0;n<N+1;++n){
-        std::cout <<"Time step n = " << n << std::endl;
-        for(int i = 0; i < nx; ++i) {
-            std::cout << "P[" << i + 1 << "] = " << P[n][i]/1E+5 << ";" << " ";
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
-    }
-    */
 }
 
 std::function<double (double,double)> AnSolver::getSol() const {

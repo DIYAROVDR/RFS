@@ -63,8 +63,8 @@ void MainWindow::on_btn_run_clicked() {
         }
     };
 
-    std::function<double(double,double)> solution = [=](double s, double xd){
-        return (exp(xd*sqrt(s))/(exp(sqrt(s))-exp(-sqrt(s))) + exp(-xd*sqrt(s))/(exp(-sqrt(s))-exp(sqrt(s))))/s;
+    std::function<double(double,double)> solution = [=](double s, double xd) {
+        return -((exp(sqrt(s))*(exp(-xd*sqrt(s))-1)-exp(-sqrt(s))*(exp(xd*sqrt(s))-1))/(exp(sqrt(s))-exp(-sqrt(s))))/s;
     };
 
     g1.setInitPressure(Pe);
@@ -116,7 +116,7 @@ void MainWindow::on_time_slider_valueChanged(int value) {
     ui->spin_box_current_time_step->setValue(value);
     ui->data->setRowCount(0);
     ui->data->setRowCount(nx+1);
-    QVector<double> Pn,Pa,x;
+    QVector<double> Pn,Pa;
     double Pa_i,Pn_i;
     for(int i = 0;i<nx;++i){
         Pn_i = P_num[value][i]/1E+5;
