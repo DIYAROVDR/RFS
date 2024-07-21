@@ -14,18 +14,24 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     mathhelper.cpp \
+    modelsdatawidget.cpp \
     numsolver.cpp \
+    plotdatawidget.cpp \
     props.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    tabledatawidget.cpp
 
 HEADERS += \
     ansolver.h \
     grid.h \
     mainwindow.h \
     mathhelper.h \
+    modelsdatawidget.h \
     numsolver.h \
+    plotdatawidget.h \
     props.h \
-    qcustomplot.h
+    qcustomplot.h \
+    tabledatawidget.h
 
 FORMS += \
     mainwindow.ui

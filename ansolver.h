@@ -37,6 +37,7 @@ public:
     std::function<double(double,double)> getSol() const;
 
     double **getPressure();
+    double* getTime();
 };
 
 #endif // ANSOLVER_H

@@ -7,6 +7,7 @@ NumSolver::NumSolver(Grid& grid,double dt,double total_time):
           dt(dt),
           total_time(total_time),
           x(new double[nx + 1]),
+          S(new double*[N + 1]),
           P(new double*[N + 1]),
           grid(grid) {
 
@@ -20,6 +21,7 @@ void NumSolver::run() {
 
     for(int n = 0; n < N + 1;++n){
         P[n] = new double[nx];
+        S[n] = new double[nx];
         if (n > 0){
             P[n][0] = function(x[0]);
             P[n][nx-1] = function(x[nx]);
@@ -40,9 +42,13 @@ void NumSolver::run() {
         std::copy(grid.getT(), grid.getT() + nx - 1, T);
         std::copy(grid.getQ(), grid.getQ() + nx, Q);
 
+        S[n][0] = D[0]/(T[1]+T[0]);
+        S[n][nx-1] = D[0]/(2*T[0]);
         for(int i = 1; i < nx - 1; ++i) {
             P[n+1][i] = P[n][i] + (dt/D[i])*(T[i]*(P[n][i+1]-P[n][i])+T[i-1]*(P[n][i-1]-P[n][i])-Q[i-1]);
+            S[n][i] = D[i]/(T[i]+T[i-1]);
         }
+
 
         grid.setPressure(P[n+1]);
         grid.update();
@@ -51,6 +57,10 @@ void NumSolver::run() {
         delete [] T;
         delete [] Q;
     }
+}
+
+double** NumSolver::stability() {
+    return S;
 }
 
 double** NumSolver::getPressure(){

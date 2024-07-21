@@ -10,7 +10,7 @@ AnSolver::AnSolver(double dt,double total_time):dt(dt),total_time(total_time) {
 }
 
 AnSolver::~AnSolver() {
-    delete [] t;
+    //delete [] t;
     delete [] x;
     //delete [] P;
 }
@@ -55,6 +55,10 @@ std::function<double (double,double)> AnSolver::getSol() const {
 
 double **AnSolver::getPressure() {
     return P;
+}
+
+double *AnSolver::getTime() {
+    return t;
 }
 
 void AnSolver::setSolution(std::function<double (double,double)> &fun) {

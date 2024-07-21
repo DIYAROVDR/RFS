@@ -2,8 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSplitter>
+#include <modelsdatawidget.h>
+#include <tabledatawidget.h>
+#include <plotdatawidget.h>
 #include "numsolver.h"
 #include "ansolver.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,18 +24,21 @@ public:
 
 private slots:
     void on_btn_run_clicked();
-    void on_edt_nx_textChanged(const QString &arg1);
-    void on_edt_nt_textChanged(const QString &arg1);
-
     void on_time_slider_valueChanged(int value);
 
 private:
     Ui::MainWindow *ui;
-    int nx;
-    double** P_num;
-    double** P_an;
+    ModelsDataWidget* modelswgt;
+    TableDataWidget* tablewgt;
+    PlotDataWidget* plotwgt;
+    QSplitter* main_spl;
+    QComboBox* cmb_type_plot_data_show;
+    QLineEdit* edt_status_solve;
+    double** Pnum;
+    double** Pan;
+    double** S;
     double* x;
-    QVector<double> coords;
+    double* t;
 
 };
 

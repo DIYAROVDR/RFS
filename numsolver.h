@@ -11,6 +11,7 @@ class NumSolver {
     double dt = 0.0;
     double total_time = 0.0;
     double* x = nullptr;
+    double** S = nullptr;
     double** P = nullptr;
     Grid grid;
 
@@ -19,7 +20,7 @@ public:
     NumSolver(Grid& grid,double dt,double total_time);
 
     void run();
-
+    double** stability();
     double** getPressure();
 
     ~NumSolver();
