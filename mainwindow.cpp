@@ -43,18 +43,15 @@ MainWindow::~MainWindow() {
 
 void MainWindow::on_btn_run_clicked() {
     int nx = modelswgt->Nx();
+    int nt = modelswgt->Nt();
+    int maxIt = modelswgt->MaxIt();
+
     double dx = modelswgt->Dx();
     double dy = modelswgt->Dy();
     double dz = modelswgt->Dz();
-    double L = nx*dx;
     double Pw = modelswgt->Pw();
     double Pe = modelswgt->Pe();
-
-    int nt = modelswgt->Nt();
-
     double T = modelswgt->totalTime();
-    double dt = T/nt;
-
     double B = modelswgt->B();
     double mu = modelswgt->Mu();
     double cf = modelswgt->Cf();
@@ -62,16 +59,20 @@ void MainWindow::on_btn_run_clicked() {
     double fi = modelswgt->Poro();
     double kx = modelswgt->Permx();
 
+    type = TypeSolve::EXPLICIT;
+    if(modelswgt->NumMethod() == "Неявный") {
+         type = TypeSolve::IMPLICIT;
+    }
+
+    double L = nx*dx;
+    double dt = T/nt;
     double ct = cf*fi+cr;
     double etta = kx/(ct*mu*fi);
-
     double dimt = etta/(L*L);
     double dimp = Pe - Pw;
     double dimx = 1/L;
 
-    Grid g1(nx,dx,dy,dz);
-    Props prop(B,mu,cf,cr);
-
+    // Граничное условие для численного решения. Случай постоянного давления на концах пласта.
     std::function<double(double)> boundaryCondition = [=](double x) {
         if (std::abs(x - 0.0) < epsilon) {
             return Pw;
@@ -82,34 +83,42 @@ void MainWindow::on_btn_run_clicked() {
         }
     };
 
+    // Решение в прастранстве Лапласа для случая ограниченного пласта длиной L с постоянными заданными давлениями на границе.
     std::function<double(double,double)> solution = [=](double s, double xd) {
         return -((exp(sqrt(s))*(exp(-xd*sqrt(s))-1)-exp(-sqrt(s))*(exp(xd*sqrt(s))-1))/(exp(sqrt(s))-exp(-sqrt(s))))/s;
     };
 
-    g1.setInitPressure(Pe);
-    g1.setPermability(kx);
-    g1.setPorosity(fi);
-    g1.setPropertyFluid(prop);
-    g1.setBoudaryCondition(boundaryCondition);
-    g1.update();
-    x = g1.getX();
+    Grid grid(nx,dx,dy,dz);
+    Props prop(B,mu,cf,cr);
 
-    NumSolver solver_1(g1,dt,T);
-    solver_1.run();
-    Pnum = solver_1.getPressure();
-    S = solver_1.stability();
+    grid.setInitPressure(Pe);
+    grid.setPermability(kx);
+    grid.setPorosity(fi);
+    grid.setPropertyFluid(prop);
+    grid.setBoudaryCondition(boundaryCondition);
+    grid.update();
 
-    AnSolver solver_2(dt,T);
-    solver_2.setDims(dimp,dimt,dimx);
-    solver_2.setCoords(nx,g1.getX());
-    solver_2.setSolution(solution);
-    solver_2.setPressure(Pw,Pe);
-    solver_2.run();
-    Pan = solver_2.getPressure();
-    t = solver_2.getTime();
+    NumSolver numSol(grid,dt,T);
+    numSol.setTypeSolve(type);
+    numSol.setMaxIt(maxIt);
+    numSol.run();
+
+    AnSolver anSol(dt,T);
+    anSol.setDims(dimp,dimt,dimx);
+    anSol.setCoords(nx,grid.getX());
+    anSol.setSolution(solution);
+    anSol.setPressure(Pw,Pe);
+    anSol.run();
+
+    Pnum = numSol.getPressure();
+    Pan = anSol.getPressure();
+    S = numSol.stability();
+    t = anSol.getTime();
+    x = grid.getX();
 
     tablewgt->setSize(nx,nt);
     tablewgt->setData(Pnum,Pan,S);
+    tablewgt->setType(TypeData::PRESSURE_VS_COORDS);
     tablewgt->setStepTime(dt);
 
     plotwgt->setSize(nx,nt);
@@ -121,7 +130,6 @@ void MainWindow::on_btn_run_clicked() {
     ui->spin_box_current_time_step->setEnabled(true);
     ui->spin_box_current_time_step->setMaximum(nt);
     ui->cmb_solve_steps->setEnabled(true);
-    on_time_slider_valueChanged(1);
 
     QStringList items;
     for(int n = 0;n < nt;++n){
@@ -129,6 +137,7 @@ void MainWindow::on_btn_run_clicked() {
     }
     ui->cmb_solve_steps->clear();
     ui->cmb_solve_steps->addItems(items);
+    on_time_slider_valueChanged(1);
 }
 
 
@@ -137,6 +146,10 @@ void MainWindow::on_time_slider_valueChanged(int value) {
     tablewgt->update(value);
     plotwgt->update(value);
     ui->cmb_solve_steps->setCurrentIndex(value);
+    if(type == TypeSolve::IMPLICIT){
+        edt_status_solve->setText("");
+        return;
+    }
     if (tablewgt->checkStability(value)){
         edt_status_solve->setText("Метод устойчив");
     }

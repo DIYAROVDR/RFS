@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/rfsw.png</file>
+        <file>images/rfsw.ico</file>
+    </qresource>
+</RCC>

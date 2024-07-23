@@ -34,6 +34,7 @@ private:
     QSplitter* main_spl;
     QComboBox* cmb_type_plot_data_show;
     QLineEdit* edt_status_solve;
+    TypeSolve type;
     double** Pnum;
     double** Pan;
     double** S;
